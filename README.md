@@ -53,6 +53,10 @@
     * 计算label的出血量lesion_volume，得到densenet微调label
     * 相比原模型：丢失了CAM和颅内出血分类功能，但不对segmentation造成影响
 
+### Result
+
+* 由于model预测lesion_volume<0的情况非常少，故该部分对整体影响微乎其微
+
 
 > reference
 >
@@ -66,7 +70,61 @@
 
 <img src="./assets/image-20240530161155491.png" alt="image-20240530161155491" style="zoom:80%;" />
 
-* 改进viola-attn计算方式：增加
+### Viola-Attn
+
+* 改进**viola-attn**计算方式
+
+  * **Origin Viola_attn**：
+
+  ```python
+  		viola_j = xs * ys + ys * zs + zs * xs       # 0-3
+          viola_m = xs * ys * zs                  # 0-1  
+          viola_a = self.relu(xt + yt + zt)       # 0-3
+  
+          viola = viola_j + viola_m + viola_a
+          viola = 0.1 * viola + 0.3 
+          viola = viola + l2norm(viola.contiguous().view(b,-1)).view(b,c,h,w,d)  
+  ```
+
+  * **New：**增加横截面的权重 & 尝试优化的超参数
+    * 在增加权重后，涉及到归一化的问题（由于原来通过sigmoid后xs、ys、zs在[0, 1]区间，相乘后仍符合），尝试2种解决方式：
+      * 激活函数再处理：sigmoid，tanh（relu）
+      * 忽略
+
+  ```python
+  # weighted 
+  viola_j = xy_weight * xs * ys + 
+  		  yz_weight * ys * zs + 
+      	  xz_weight * zs * xs
+  
+  # viola_j = activate_func(viola_j)
+          
+  # alter hyperparameters
+  viola = viola_k * viola + viola_b
+  ```
+
+### fine-tuning
+
+* 在更改Viola-Attn后，需要对模型微调（或者重新训练）
+  * current：仅对截面加权，并未修改超参
+
+### Result
+
+* 仅进行了一次完整的预训练+预测，params：
+
+  > xy_weight: 0.4*2.5=1
+  >
+  > yz_weight: 0.3*2.5=7.5
+  >
+  > xz_weight: 0.3*2.5=7.5
+  >
+  > activate_again: false
+  >
+  > viola_k: 0.1
+  >
+  > viola_b: 0.3
+
+* 效果较之前差别不大：DSC略高，HD几乎相同（RVD，NSD暂未考虑）
 
 ## Other dataset
 

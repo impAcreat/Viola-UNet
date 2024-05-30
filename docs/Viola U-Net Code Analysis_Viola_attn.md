@@ -8,6 +8,20 @@
 
 ![image-20240509143839227](./assets/image-20240509143839227.png)
 
+* **AdaAvgPool+ DDCM->vx,y,vz**：将信息压缩到表征空间，再用空洞卷积提取特征
+
+* **Sigmoid ->xs,ys,zs**：激活函数处理
+
+* **self.act(torch.cat((vx,vy, vz),3))->vxyz**：连接3个表征，统一进行归一化与激活
+
+* 从处理得到的vxyz中取出原表征对应部分，与**xs/ys/zs** 相加求算数平均 **->xt,yt,zt**
+
+```python
+    xt = 0.5 * (vxyz[:, :, :, 0:h] + xs)
+    yt = 0.5 * (vxyz[:, :, :, h:h+w] + ys)
+    zt = 0.5 * (vxyz[:, :, :, h+w:h+w+d] + zs)
+```
+
 * **view -> xs, ys, zs, xt, yt, zt**：统一矩阵维度，方便后续处理
 
 * **Viola_attn**：
