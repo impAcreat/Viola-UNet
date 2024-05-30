@@ -1,21 +1,49 @@
-## Current Problems
+## Dir
 
-* 数据集问题：
-  * ISTANCE 2022： forbidden
-  * NIHCC：医学图像格式转换
-
-## Improve Points
-
-* 图像去噪
-  * 椒盐噪声、高斯噪声
-* 对比增强
-* 任务：
-  * 图像分割：对病灶、对器官的图片进行目标分割（从组织中找到病灶）
-  * 图像检测：（肺结节检测）
-  * 量估计
+* docs：
+  * analysis of model and code
+  * dataset
+  * ourwork
+  * ......
+* Viola-UNet
+  * integrated work improved from original code
+* mine
+  * test
+  * pretrain, display, .....
 
 
 
-* 医学图像分割模型很难在多种影像上同时具备SOTA性能
-* 利用先验信息
+## Usage
+
+* define your file path in ./Viola-Unet/config.py
+  * ATTNETION: root file is supposed to be defined correctly
+* use main to run
+
+
+
+## OURWORK
+
+### detector
+
+
+
+
+
+### pretrain
+
+
+
+
+
+### Viola attn
+
+
+
+
+
+### Other dataset
+
+* Robustness
+
+
 
