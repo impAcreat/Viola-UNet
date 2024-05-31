@@ -1,3 +1,19 @@
+## Abstract
+
+
+
+## TODO
+
+* class ddl：2024.7.30
+* Content：
+  * Mid-Term Report PPT
+  * Final Report PPT
+  * Report: conclude docs
+  * code: this project
+
+1. 完善模型预训练
+2. 
+
 ## Dir
 
 * docs：
@@ -86,10 +102,19 @@
           viola = viola + l2norm(viola.contiguous().view(b,-1)).view(b,c,h,w,d)  
   ```
 
-  * **New:**增加横截面的权重 & 尝试优化的超参数
-    * 在增加权重后，涉及到归一化的问题（由于原来通过sigmoid后xs、ys、zs在[0, 1]区间，相乘后仍符合），尝试2种解决方式：
-      * 激活函数再处理：sigmoid，tanh（relu）
-      * 忽略
+  * #### Improvement: 增加横截面的权重 & 尝试优化的超参数
+    * ##### 修改注意力机制
+      * Shortcomings：
+        * 如上文，考虑到医学图片可能出现类似一个截面质量明显优于其它的情况，此时若能提高模型对该截面的关注度，能有效提高performance
+        * 如果只是单纯加权的话，模型鲁棒性可能较差，如果用于其它Dateset或者其它身体部位，明显依据当前数据集实验出的权重是无效的
+      * Solution：为截面加权，并将其设为可学习参数 --> xy_weight...
+      > 在增加权重后，涉及到归一化的问题（由于原来通过sigmoid后xs、ys、zs在[0, 1]区间，相乘后仍符合），尝试2种解决方式：
+        * 激活函数再处理：sigmoid，tanh（relu）
+        * 忽略
+  
+    * ##### 超参数为何固定
+      * `viola = 0.1 * viola + 0.3` 写死了参数，能否调优？
+  
 
   ```python
   # weighted 
@@ -108,7 +133,7 @@
 
 ### Result
 
-* 仅进行了一次完整的预训练+预测，params：
+* 仅进行了一次完整的预训练+预测（5.30），params：
 
   > xy_weight: 0.4*2.5=1
   >
@@ -125,8 +150,9 @@
 * 效果较之前差别不大：DSC略高，HD几乎相同（RVD，NSD暂未考虑）
 
 ## Other dataset
-
-* Robustness
+* for Robustness
+* 目标：探究当前模型对NIHCC数据集的鲁棒性
+* **身体部位不同，往往病变检测方式不同，需要对模型进行微调！！！**
 
 
 
