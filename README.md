@@ -86,7 +86,7 @@
           viola = viola + l2norm(viola.contiguous().view(b,-1)).view(b,c,h,w,d)  
   ```
 
-  * **New：**增加横截面的权重 & 尝试优化的超参数
+  * **New:**增加横截面的权重 & 尝试优化的超参数
     * 在增加权重后，涉及到归一化的问题（由于原来通过sigmoid后xs、ys、zs在[0, 1]区间，相乘后仍符合），尝试2种解决方式：
       * 激活函数再处理：sigmoid，tanh（relu）
       * 忽略
