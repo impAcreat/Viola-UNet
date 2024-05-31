@@ -1,6 +1,11 @@
 ## Abstract
 
-
+* 基于Viola UNet
+* 对颅内出血进行segmentation，预估出血量
+* 主要工作：
+  * 在原模型的基础上，改进Viola attn，进行预训练
+  * 由于原模型未提供detector的densenet，基于torch用ImageNet训练的权重对densenet微调
+  * 探究模型对其它数据集的鲁棒性
 
 ## TODO
 
@@ -11,8 +16,9 @@
   * Report: conclude docs
   * code: this project
 
-1. 完善模型预训练
-2. 
+1. 完善主模型预训练，改进为可学习参数，进行实验
+2. 鲁班性研究
+3. 另一个超参（可做可不做）
 
 ## Dir
 
