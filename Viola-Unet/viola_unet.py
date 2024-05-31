@@ -135,6 +135,16 @@ class viola_attx_ddcm_dyk(nn.Module):
     def __init__(self, channel, reduction=16, min_dim=4, k_size=3):
         super(viola_attx_ddcm_dyk, self).__init__()
         
+        ## learnable parameters---------------------------------------------------
+        self.xy_weight = nn.Parameter(torch.FloatTensor(1), requires_grad=True)
+        self.yz_weight = nn.Parameter(torch.FloatTensor(1), requires_grad=True)
+        self.xz_weight = nn.Parameter(torch.FloatTensor(1), requires_grad=True)
+        
+        self.xy_weight.data.fill_(1.2)
+        self.yz_weight.data.fill_(0.8)
+        self.xz_weight.data.fill_(0.8)
+        ## ------------------------------------------------------------------------
+        
         ## dimension :
         # input: (batch_size, channels, depth, height, width)
         # output: (batch_size, channels, D_out, H_out, W_out)
@@ -194,13 +204,18 @@ class viola_attx_ddcm_dyk(nn.Module):
         yt = yt.view(b, c, 1, w, 1)
         zt = zt.view(b, c, 1, 1, d)
 
-
-        viola_j = xs * ys + ys*zs + zs*xs       # 0-3
+        ## weighted ---------------------------------------------------------------
+        viola_j = self.xy_weight * xs * ys + self.yz_weight * ys * zs + self.xz_weight * zs * xs
+        # viola_j = self.activate_func(viola_j)
+        # -------------------------------------------------------------------------
+        # viola_j = xs * ys + ys*zs + zs*xs       # 0-3
+        ## ------------------------------------------------------------------------
         viola_m = xs * ys * zs                  # 0-1  
         viola_a = self.relu(xt + yt + zt)       # 0-3
 
         viola = viola_j + viola_m + viola_a
         viola = 0.1 * viola + 0.3 
+        # viola = self.viola_k * viola + self.viola_b
         viola = viola + l2norm(viola.contiguous().view(b,-1)).view(b,c,h,w,d)           
 
         return x * viola

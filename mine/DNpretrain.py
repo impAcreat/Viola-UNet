@@ -13,6 +13,7 @@ def get_densenet121_model(num_classes, device):
     num_features = model.classifier.in_features
     model.classifier = nn.Linear(num_features, num_classes)
     model = model.to(device)
+    
     return model
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs, device):
@@ -81,6 +82,7 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     ## 
-    model = train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=25, device=device)
+    model = train_model(model, train_loader, val_loader, criterion, optimizer,
+                        num_epochs=config.num_epochs, device=device)
 
     torch.save(model.state_dict(), config.dn_model_path)

@@ -19,18 +19,17 @@ import config
 if __name__ == '__main__':
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    
+
     models = [] # ensemble models, stack together
-    
     models.append(load_model(network="nnUNet", device = device).eval())
     models.append(load_model(network="Viola_s", device = device).eval())
 
-
     test_file_list, dataloader = load_data(config.input_dir)
 
-    # out_file_name = "predictions_info.csv"
     csv_file = os.path.join(config.predict_dir, "predictions_info.csv")
      
+    # ------------------------------------------------------------------------- 
+    ## eval
     with torch.no_grad():
         num_scans = len(dataloader)
         print('\n-------There are total "{0}" CT scans found in the input folder -----'.format(num_scans))
@@ -42,10 +41,8 @@ if __name__ == '__main__':
             filenames.append(filename)
             
             raw_data = read_raw_image(test_file_list[i])
-            print("raw_data keys:", raw_data.keys())
             raw_img = raw_data["image"]
             pixdims = raw_data["image_meta_dict"]["pixdim"][1:4]
-            # pixdims = raw_data["image_meta_dict"]["pixdim"][1:4]
             pix_volume = pixdims[0] * pixdims[1] * pixdims[2]  # mm^3
             new_pix_vol = spacing[0] * spacing[1] * spacing[2] 
             
@@ -53,7 +50,6 @@ if __name__ == '__main__':
             print('\n--------start detect, classify, and segment ICH from "{0}" - {1}/{2} ----------------'.format(filename, i + 1, num_scans))
 
             print('\n--------start segmentation-------')
-            # print("image size after preprocessed: ", images.size())
 
             start_time = time.time()
             pred_outputs = list()
@@ -107,13 +103,16 @@ if __name__ == '__main__':
                 test_file_list[i]['image']
                 )
             
+            # -------------------------------------------------------------------------
+            ## timer
             infer_time.append(time.time() - start_time)
             print('Cost time: {:.3f} sec'.format(time.time() - start_time))
 
+            ## save to file
             if os.path.isfile(csv_file):
                 pred_csv = pd.read_csv(csv_file)
             else:
-                pred_csv = pd.DataFrame(columns = ['Filename', 'Pre_volume',"Infer_time"])
+                pred_csv = pd.DataFrame(columns = ['Filename', 'Pre_volume', "Infer_time"])
             
             df = pd.DataFrame({'Filename': filenames, 'Pre_volume': pred_volums,
                                "Infer_time": infer_time})

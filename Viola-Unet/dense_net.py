@@ -11,6 +11,8 @@ from pytorch_grad_cam import  EigenCAM #,GradCAM, HiResCAM, ScoreCAM, GradCAMPlu
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
+import config
+
 
 pre_trained_models = {
     'dense_net121': {
@@ -45,7 +47,12 @@ class DenseNet121(nn.Module):
 def load_detect_modes(net="dense_net121", device='cpu'):
     model_list = []
     model = DenseNet121()
-    model_list.append(model.eval().to(device))
+    
+    ## fine-tuned --------------------------------------------------------------
+    model.load_state_dict(torch.load(config.densenet_path, map_location=device))
+    
+    
+    ## original ----------------------------------------------------------------
     # for k in pre_trained_models[net].keys():
     #     if net == "dense_net121":
     #         model = DenseNet121()
@@ -57,8 +64,9 @@ def load_detect_modes(net="dense_net121", device='cpu'):
     #     state_dict = {k.partition('module.')[2]: state_dict[k] for k in state_dict.keys()}
     #     model.load_state_dict(state_dict, strict=False)
     #     model_list.append(model.eval().to(device))
+    # --------------------------------------------------------------------------
     
-
+    model_list.append(model.eval().to(device))
     return model_list
 
 
